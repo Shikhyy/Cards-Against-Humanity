@@ -109,11 +109,12 @@ body {
   border-top: 1px solid #333;
   display: flex;
   flex-direction: column;
-  height: 30vh;
-  /* Increased from 25vh */
-  max-height: 320px;
-  min-height: 220px;
-  /* Increased from 180px */
+  height: 35vh;
+  /* Increased for better visibility */
+  max-height: 400px;
+  /* Increased from 320px */
+  min-height: 280px;
+  /* Increased from 220px */
   box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.5);
   position: relative;
   z-index: 20;
@@ -149,7 +150,8 @@ body {
   align-items: center;
   gap: -12vw;
   /* Tight overlap on mobile */
-  padding: 20px 40px;
+  padding: 30px 40px;
+  /* Increased padding for more breathing room */
   overflow-x: auto;
   overflow-y: hidden;
   height: 100%;
@@ -189,7 +191,8 @@ body {
   /* Dynamic font size */
   font-weight: 700;
   line-height: 1.3;
-  color: black;
+  color: #000 !important;
+  /* Force black text on white cards */
   flex-shrink: 0;
   cursor: pointer;
   border: 1px solid #ccc;
@@ -198,11 +201,12 @@ body {
   position: relative;
   box-sizing: border-box;
   /* IMPORTANT: Include padding in width */
+  transition: transform 0.2s, box-shadow 0.2s;
 }
 
 .card.black {
   background: var(--card-black);
-  color: white;
+  color: white !important;
   box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
   border: 1px solid #333;
 }
@@ -212,6 +216,8 @@ body {
   overflow-y: auto;
   /* Allow text scroll if too long */
   scrollbar-width: none;
+  color: inherit;
+  /* Inherit color from parent card */
 }
 
 .card-text::-webkit-scrollbar {
@@ -225,6 +231,8 @@ body {
   gap: 4px;
   align-items: center;
   flex-shrink: 0;
+  color: inherit;
+  /* Inherit color from parent card */
 }
 
 .card-logo::before {
@@ -604,10 +612,8 @@ body {
   justify-content: center;
   width: 100%;
   height: 100%;
-  color: white;
-  text-align: center;
-  color: white;
-  text-align: center;
+  padding: 20px;
+  box-sizing: border-box;
 }
 
 .game-over-card {
@@ -615,40 +621,36 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  /* Center content internally */
-  padding: 40px;
-  border-radius: 20px;
+  padding: 60px 40px;
+  border-radius: 24px;
   width: 100%;
-  /* Full width */
-  height: 100%;
-  /* Full height */
-  max-width: none;
-  /* Remove constraint */
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
-  background: rgba(20, 20, 20, 0.6);
-  /* Slightly darker/opaque for readability */
-  backdrop-filter: blur(16px);
+  max-width: 800px;
+  box-shadow:
+    0 20px 50px rgba(0, 0, 0, 0.5),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 255, 255, 0.1);
   box-sizing: border-box;
-  /* Ensure padding doesn't overflow */
 }
 
-.game-over-container h1 {
-  font-size: 5rem;
-  /* Larger but cleaner */
-  font-weight: 800;
+.game-over-card h1 {
+  font-size: clamp(3rem, 6vw, 5rem);
+  font-weight: 900;
   margin-bottom: 2rem;
   letter-spacing: -2px;
-  background: linear-gradient(180deg, #fff 0%, #ccc 100%);
+  text-transform: uppercase;
+  background: linear-gradient(180deg, #FFFFFF 0%, #A0A0A0 100%);
   -webkit-background-clip: text;
-  background-clip: text;
   -webkit-text-fill-color: transparent;
-  text-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
-  /* softer shadow */
+  background-clip: text;
+  text-fill-color: transparent;
+  text-shadow: 0px 2px 5px rgba(0, 0, 0, 0.5);
 }
 
 .winner-display {
-  margin-bottom: 3rem;
+  margin-bottom: 2.5rem;
   animation: popIn 0.5s ease-out;
 }
 
@@ -660,8 +662,9 @@ body {
 }
 
 .winner-display p {
-  color: #888;
-  font-size: 1.1rem;
+  color: #aaa;
+  font-size: 1.2rem;
+  font-weight: 300;
 }
 
 .final-scores {

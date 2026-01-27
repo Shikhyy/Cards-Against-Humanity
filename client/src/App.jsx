@@ -16,7 +16,7 @@ const cardVariants = {
     opacity: 1,
     y: 0,
     rotate: (Math.random() - 0.5) * 4, // Subtle random tilt like real cards
-    transition: { delay: i * 0.05, type: "spring", stiffness: 100 }
+    transition: { delay: i * 0.1, duration: 0.5, type: "spring", stiffness: 50 }
   }),
   hover: {
     y: -40,
@@ -57,6 +57,7 @@ const Card = ({ text, type = "white", onClick, isSelected, index }) => (
     custom={index}
     onClick={onClick}
     layoutId={type === "black" ? "black-card" : undefined} // Smooth transition if position changes
+    style={{ color: type === "black" ? "#fff" : "#000" }} // Explicitly preserve text color
   >
     <div className="card-text" dangerouslySetInnerHTML={{ __html: text }} />
     <div className="card-logo">Cards Against Humanity</div>
@@ -448,55 +449,55 @@ function App() {
         )}
       </main>
 
-      {/* PLAYER HAND */}
-      <section className="hand-container">
-        {room.gameState === 'LOBBY' ? (
-          <div style={{ textAlign: 'center', color: '#999' }}>Get ready to be offensive.</div>
-        ) : room.gameState === 'GAME_OVER' ? (
-          <div style={{ textAlign: 'center', color: '#666' }}>Thanks for playing.</div>
-        ) : isCzar ? (
-          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
-            <h2>You are the Czar.</h2>
-          </div>
-        ) : (
-          <div className="hand-scroll">
-            <AnimatePresence>
-              {myHand.map((cardText, i) => (
-                <Card
-                  key={cardText} // Use text as key for simplicity, assuming unique enough for MVP
-                  index={i}
-                  text={cardText}
-                  type="white"
-                  isSelected={selectedCards.includes(cardText)}
-                  onClick={() => {
-                    if (room.gameState !== 'SELECTION') return;
-                    if (selectedCards.includes(cardText)) {
-                      setSelectedCards(selectedCards.filter(c => c !== cardText));
-                    } else {
-                      if (selectedCards.length < (room.blackCard?.pick || 1)) {
-                        setSelectedCards([...selectedCards, cardText]);
+      {/* PLAYER HAND - HIDE ON GAME OVER */}
+      {room.gameState !== 'GAME_OVER' && (
+        <section className="hand-container">
+          {room.gameState === 'LOBBY' ? (
+            <div style={{ textAlign: 'center', color: '#999' }}>Get ready to be offensive.</div>
+          ) : isCzar ? (
+            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+              <h2>You are the Czar.</h2>
+            </div>
+          ) : (
+            <div className="hand-scroll">
+              <AnimatePresence>
+                {myHand.map((cardText, i) => (
+                  <Card
+                    key={cardText} // Use text as key for simplicity, assuming unique enough for MVP
+                    index={i}
+                    text={cardText}
+                    type="white"
+                    isSelected={selectedCards.includes(cardText)}
+                    onClick={() => {
+                      if (room.gameState !== 'SELECTION') return;
+                      if (selectedCards.includes(cardText)) {
+                        setSelectedCards(selectedCards.filter(c => c !== cardText));
+                      } else {
+                        if (selectedCards.length < (room.blackCard?.pick || 1)) {
+                          setSelectedCards([...selectedCards, cardText]);
+                        }
                       }
-                    }
-                  }}
-                />
-              ))}
-            </AnimatePresence>
+                    }}
+                  />
+                ))}
+              </AnimatePresence>
 
-            {/* Floating Submit Button */}
-            {selectedCards.length === (room.blackCard?.pick || 1) && room.gameState === 'SELECTION' && (
-              <motion.button
-                initial={{ y: 100 }}
-                animate={{ y: 0 }}
-                className="btn-primary"
-                style={{ position: 'absolute', right: '40px', bottom: '40px', boxShadow: '0 10px 20px rgba(0,0,0,0.3)', zIndex: 300 }}
-                onClick={handleSubmitCards}
-              >
-                SUBMIT
-              </motion.button>
-            )}
-          </div>
-        )}
-      </section>
+              {/* Floating Submit Button */}
+              {selectedCards.length === (room.blackCard?.pick || 1) && room.gameState === 'SELECTION' && (
+                <motion.button
+                  initial={{ y: 100 }}
+                  animate={{ y: 0 }}
+                  className="btn-primary"
+                  style={{ position: 'absolute', right: '40px', bottom: '40px', boxShadow: '0 10px 20px rgba(0,0,0,0.3)', zIndex: 300 }}
+                  onClick={handleSubmitCards}
+                >
+                  SUBMIT
+                </motion.button>
+              )}
+            </div>
+          )}
+        </section>
+      )}
     </div>
   );
 }
