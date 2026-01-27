@@ -1,0 +1,173 @@
+:root {
+  --bg-dark: #0f0f13;
+  --bg-card: #1e1e24;
+  --text-main: #ffffff;
+  --text-muted: #a0a0b0;
+  --accent: #6c5ce7;
+  --accent-hover: #5649c0;
+  --danger: #ff4757;
+  --white-card: #ffffff;
+  --black-card: #000000;
+  --glass: rgba(255, 255, 255, 0.05);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  font-family: 'Inter', sans-serif;
+  line-height: 1.5;
+  color-scheme: dark;
+}
+
+body {
+  margin: 0;
+  background-color: var(--bg-dark);
+  color: var(--text-main);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  overflow-x: hidden;
+}
+
+#root {
+  width: 100%;
+  max-width: 1280px;
+  padding: 2rem;
+  box-sizing: border-box;
+}
+
+/* Typography */
+h1, h2, h3 {
+  margin: 0;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+h1 { font-size: 2.5rem; background: linear-gradient(135deg, #fff, #a5a5a5); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+h2 { font-size: 1.5rem; color: var(--text-main); }
+p { color: var(--text-muted); }
+
+/* Components */
+.btn {
+  background: var(--accent);
+  color: white;
+  border: none;
+  padding: 0.8rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 1rem;
+}
+.btn:hover { background: var(--accent-hover); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(108, 92, 231, 0.3); }
+.btn:disabled { background: var(--bg-card); color: var(--text-muted); cursor: not-allowed; transform: none; box-shadow: none; }
+.btn.danger { background: var(--danger); }
+
+.input {
+  background: var(--bg-card);
+  border: 1px solid var(--glass-border);
+  color: white;
+  padding: 0.8rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  width: 100%;
+  box-sizing: border-box;
+  outline: none;
+}
+.input:focus { border-color: var(--accent); }
+
+/* Cards */
+.card-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: center;
+  perspective: 1000px;
+}
+
+.playing-card {
+  width: 160px;
+  height: 220px;
+  border-radius: 12px;
+  padding: 1.2rem;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  font-weight: 600;
+  font-size: 0.95rem;
+  position: relative;
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s;
+  cursor: pointer;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+  user-select: none;
+}
+.playing-card:hover { transform: translateY(-8px) rotate(1deg); z-index: 10; box-shadow: 0 12px 24px rgba(0,0,0,0.5); }
+.playing-card.selected { border: 3px solid var(--accent); transform: translateY(-12px); box-shadow: 0 0 0 4px rgba(108, 92, 231, 0.4); }
+
+.card-white {
+  background: var(--white-card);
+  color: #2d3436;
+}
+
+.card-black {
+  background: var(--black-card);
+  color: white;
+  border: 1px solid #333;
+}
+
+.card-stack {
+  position: relative;
+  width: 160px;
+  height: 220px;
+  margin: 0.5rem;
+}
+.card-stack .playing-card {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+.card-stack .playing-card:nth-child(1) { transform: rotate(-2deg); }
+.card-stack .playing-card:nth-child(2) { transform: rotate(2deg) translateY(40px); z-index: 2; box-shadow: 0 -2px 10px rgba(0,0,0,0.2); }
+
+/* Layouts */
+.screen {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  align-items: center;
+  animation: fadeIn 0.5s ease;
+}
+
+.hud {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  padding: 1rem;
+  background: var(--glass);
+  backdrop-filter: blur(10px);
+  border-radius: 12px;
+  border: 1px solid var(--glass-border);
+  margin-bottom: 2rem;
+}
+
+.status-badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  background: rgba(108, 92, 231, 0.2);
+  color: var(--accent);
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+.winner-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.8);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  backdrop-filter: blur(5px);
+}
