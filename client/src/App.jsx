@@ -350,7 +350,7 @@ function App() {
               <h1>GAME OVER</h1>
               <div className="winner-display">
                 <h2 style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
-                  {room.lastWinner} Wins!
+                  {room.gameWinnerDisplay || `${room.lastWinner} Wins!`}
                 </h2>
                 <p>The most horrible person in this room.</p>
               </div>
@@ -367,7 +367,10 @@ function App() {
                     </div>
                   ))}
               </div>
-              <button className="btn-primary" onClick={() => window.location.reload()}>Back to Menu</button>
+              <div style={{ display: 'flex', gap: '15px' }}>
+                <button className="btn-primary" onClick={handleStart}>Play Again</button>
+                <button className="btn-primary" onClick={() => window.location.reload()}>Back to Menu</button>
+              </div>
             </div>
           </motion.div>
         )}

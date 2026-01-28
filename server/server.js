@@ -85,7 +85,14 @@ function startRound(room) {
             }
         });
 
-        room.lastWinner = winners.join(' & ');
+        // Grammatically correct winner text
+        if (winners.length === 1) {
+            room.gameWinnerDisplay = `${winners[0]} Wins!`;
+        } else {
+            room.gameWinnerDisplay = `${winners.join(' & ')} Win!`;
+        }
+
+        room.lastWinner = winners.join(' & '); // Keep for legacy or logic usage
         io.to(room.id).emit('update_gamestate', room);
         return;
     }
@@ -284,6 +291,19 @@ io.on('connection', (socket) => {
         // Logic: Game starts.
         room.gameState = 'SELECTION';
 
+        // RESET SCORES & POT (Play Again Logic)
+        room.players.forEach(p => {
+            p.score = 0;
+
+            // Recycle hand to discard pile before clearing
+            if (p.hand.length > 0) {
+                room.discardPile.white.push(...p.hand);
+            }
+            // Clear hand to ensure fresh deal
+            p.hand = [];
+        });
+        room.pot = 0;
+
         // Ensure 10 cards (for potential late joiners or just safety)
         room.players.forEach(p => {
             while (p.hand.length < 10) {
@@ -324,6 +344,9 @@ io.on('connection', (socket) => {
     // Pick Winner
     socket.on('pick_winner', ({ roomId, winnerId }) => {
         const room = rooms[roomId];
+        // FIX: Prevent double-clicking causing skipped rounds
+        if (!room || room.gameState !== 'JUDGING') return;
+
         const winnerSub = room.submittedCards[winnerId];
         if (!winnerSub) return;
 
