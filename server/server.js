@@ -112,7 +112,25 @@ function startRound(room) {
 
     // NOTE: We do NOT draw white cards here. Players play from their initial 10 until empty.
 
-    io.to(room.id).emit('update_gamestate', room);
+    // --- Helper for Payload Sanitization ---
+    const getPublicState = (room) => {
+        if (!room) return null;
+        return {
+            ...room,
+            deck: {
+                white: room.deck.white.length,
+                black: room.deck.black.length
+            },
+            discardPile: {
+                white: room.discardPile.white.length,
+                black: room.discardPile.black.length
+            }
+            // We keep 'players' as-is for now (including hands) to avoid breaking client logic
+            // that relies on finding 'my hand' in the player list.
+        };
+    };
+
+    io.to(room.id).emit('update_gamestate', getPublicState(room));
 }
 
 // Rotate Czar (Helper for force rotation)
@@ -137,9 +155,9 @@ function checkAllSubmitted(room) { // Check if all players (except Czar) have su
     if (room.submittedCards.length >= pendingPlayers && pendingPlayers > 0) {
         room.gameState = 'JUDGING';
         room.submittedCards = shuffle(room.submittedCards);
-        io.to(room.id).emit('update_gamestate', room);
+        io.to(room.id).emit('update_gamestate', getPublicState(room));
     } else {
-        io.to(room.id).emit('update_gamestate', room);
+        io.to(room.id).emit('update_gamestate', getPublicState(room));
     }
 }
 
@@ -219,7 +237,7 @@ io.on('connection', (socket) => {
             player.hand.push(drawCard(rooms[roomId], 'white'));
         }
 
-        socket.emit('update_gamestate', rooms[roomId]);
+        socket.emit('update_gamestate', getPublicState(rooms[roomId]));
         console.log(`${username} created room ${roomId}`);
     });
 
@@ -244,7 +262,7 @@ io.on('connection', (socket) => {
             player.hand.push(drawCard(room, 'white'));
         }
 
-        io.to(roomId).emit('update_gamestate', room);
+        io.to(roomId).emit('update_gamestate', getPublicState(room));
         console.log(`${username} joined ${roomId}`);
     });
 
@@ -272,7 +290,7 @@ io.on('connection', (socket) => {
         }
 
         room.players.push(bot);
-        io.to(roomId).emit('update_gamestate', room);
+        io.to(roomId).emit('update_gamestate', getPublicState(room));
         io.to(roomId).emit('notification', `${botName} added to the game.`);
     });
 
@@ -291,6 +309,11 @@ io.on('connection', (socket) => {
         // Logic: Game starts.
         room.gameState = 'SELECTION';
 
+        // CRITICAL FIX: Reset round state completely to prevent ghost cards
+        room.submittedCards = [];
+        room.gameWinnerDisplay = null;
+        room.lastWinningCards = []; // Optional, but good for safety
+
         // RESET SCORES & POT (Play Again Logic)
         room.players.forEach(p => {
             p.score = 0;
@@ -304,6 +327,8 @@ io.on('connection', (socket) => {
         });
         room.pot = 0;
 
+        console.log(`DEBUG: Room ${roomId} Restarting. Deck Size: ${room.deck.white.length}, Discard Size: ${room.discardPile.white.length}`);
+
         // Ensure 10 cards (for potential late joiners or just safety)
         room.players.forEach(p => {
             while (p.hand.length < 10) {
@@ -314,10 +339,15 @@ io.on('connection', (socket) => {
         // Draw first black card
         room.blackCard = drawCard(room, 'black');
 
+        // NEW: Reshuffle the remaining deck to ensure sequence changes every game
+        room.deck.white = shuffle(room.deck.white);
+        room.deck.black = shuffle(room.deck.black);
+        console.log(`DEBUG: Reshuffled remaining decks for new game sequence.`);
+
         // Check if Bots need to play immediately
         processBotMoves(room);
 
-        io.to(roomId).emit('update_gamestate', room);
+        io.to(roomId).emit('update_gamestate', getPublicState(room));
         console.log(`Starting game for room ${roomId}`);
     });
 
@@ -365,7 +395,7 @@ io.on('connection', (socket) => {
         });
         room.discardPile.black.push(room.blackCard);
 
-        io.to(roomId).emit('update_gamestate', room);
+        io.to(roomId).emit('update_gamestate', getPublicState(room));
 
         // Start next round after delay
         setTimeout(() => {
@@ -396,7 +426,7 @@ io.on('connection', (socket) => {
                         if (room.gameState === 'SELECTION') {
                             checkAllSubmitted(room);
                         }
-                        io.to(roomId).emit('update_gamestate', room);
+                        io.to(roomId).emit('update_gamestate', getPublicState(room));
                     }
                 }
                 break;
@@ -411,7 +441,7 @@ io.on('connection', (socket) => {
         if (player && player.score > 0) {
             player.score--;
             room.pot++;
-            io.to(roomId).emit('update_gamestate', room);
+            io.to(roomId).emit('update_gamestate', getPublicState(room));
             io.to(roomId).emit('notification', `${player.username} raised the stakes!`);
         }
     });
