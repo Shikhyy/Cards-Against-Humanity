@@ -65,6 +65,24 @@ function drawCard(room, type) {
     return card;
 }
 
+// --- Helper for Payload Sanitization ---
+const getPublicState = (room) => {
+    if (!room) return null;
+    return {
+        ...room,
+        deck: {
+            white: room.deck.white.length,
+            black: room.deck.black.length
+        },
+        discardPile: {
+            white: room.discardPile.white.length,
+            black: room.discardPile.black.length
+        }
+        // We keep 'players' as-is for now (including hands) to avoid breaking client logic
+        // that relies on finding 'my hand' in the player list.
+    };
+};
+
 
 function startRound(room) {
     // 1. Check if we should End the Game (Survival Mode: Game Ends when players run out)
@@ -112,23 +130,7 @@ function startRound(room) {
 
     // NOTE: We do NOT draw white cards here. Players play from their initial 10 until empty.
 
-    // --- Helper for Payload Sanitization ---
-    const getPublicState = (room) => {
-        if (!room) return null;
-        return {
-            ...room,
-            deck: {
-                white: room.deck.white.length,
-                black: room.deck.black.length
-            },
-            discardPile: {
-                white: room.discardPile.white.length,
-                black: room.discardPile.black.length
-            }
-            // We keep 'players' as-is for now (including hands) to avoid breaking client logic
-            // that relies on finding 'my hand' in the player list.
-        };
-    };
+
 
     io.to(room.id).emit('update_gamestate', getPublicState(room));
 }
