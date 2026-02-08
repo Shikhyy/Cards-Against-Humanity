@@ -168,7 +168,7 @@ Before you begin, ensure you have the following installed:
 ### Frontend
 | Technology | Purpose |
 |------------|---------|
-| **React 19** | UI framework with modern features |
+| **React 19.2.0** | UI framework with modern features |
 | **Vite** | Lightning-fast build tool and dev server |
 | **Socket.IO Client** | Real-time WebSocket communication |
 | **Framer Motion** | Smooth, physics-based animations |
